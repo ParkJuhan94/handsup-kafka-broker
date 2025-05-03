@@ -19,6 +19,7 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
       KAFKA_LOG_RETENTION_HOURS: 72       # 필요시: 로그 보관 기간
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_HEAP_OPTS: "-Xmx512M -Xms128M"
     depends_on:
       - zookeeper
     platform: linux/amd64
