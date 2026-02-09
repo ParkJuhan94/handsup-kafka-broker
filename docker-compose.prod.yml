@@ -48,6 +48,20 @@ services:
       retries: 5
       start_period: 45s
 
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: hands-up-kafka-ui
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      DYNAMIC_CONFIG_ENABLED: "true"
+      KAFKA_CLUSTERS_0_NAME: hands-up-prod
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: hands-up-kafka:9092
+    depends_on:
+      kafka:
+        condition: service_healthy
+    restart: unless-stopped
+
 volumes:
   kafka-data:
     driver: local
