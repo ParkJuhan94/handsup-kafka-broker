@@ -1,8 +1,8 @@
-name: 📌 CD Kafka Broker
+name: CD Kafka Broker
 
 on:
   push:
-    branches: [ "main", "dev" ]
+    branches: [ "main" ]
 
 jobs:
   deploy:
@@ -10,29 +10,23 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Docker Hub Login
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Generate .env file
-        run: echo "${{ secrets.ENV_CONTENT }}" > .env
+      - name: Generate .env.prod file
+        run: echo "${{ secrets.ENV_PROD_CONTENT }}" > .env.prod
 
       - name: Copy files to EC2
-        uses: appleboy/scp-action@master
+        uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
           port: ${{ secrets.EC2_PORT }}
-          source: "Dockerfile,docker-compose.yml,.env"
+          source: "docker-compose.prod.yml,.env.prod"
           target: "~/kafka-broker/"
 
       - name: Deploy Kafka Broker
-        uses: appleboy/ssh-action@master
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
@@ -40,7 +34,28 @@ jobs:
           port: ${{ secrets.EC2_PORT }}
           script: |
             cd ~/kafka-broker
-            docker-compose down
-            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/kafka-broker
-            docker-compose up -d
+            docker compose -f docker-compose.prod.yml --env-file .env.prod down
+            docker compose -f docker-compose.prod.yml --env-file .env.prod up -d
             docker system prune -f
+
+      - name: Verify Deployment
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+          port: ${{ secrets.EC2_PORT }}
+          script: |
+            echo "Waiting for Kafka to become healthy..."
+            for i in $(seq 1 12); do
+              STATUS=$(docker inspect --format='{{.State.Health.Status}}' hands-up-kafka 2>/dev/null || echo "not found")
+              echo "Attempt $i/12: Status=$STATUS"
+              if [ "$STATUS" = "healthy" ]; then
+                echo "Kafka broker is healthy."
+                exit 0
+              fi
+              sleep 10
+            done
+            echo "ERROR: Kafka broker did not become healthy within 120 seconds."
+            docker logs hands-up-kafka --tail 50
+            exit 1
