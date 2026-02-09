@@ -1,4 +1,4 @@
-name: CD Kafka Broker
+name: CD Kafka
 
 on:
   push:
@@ -23,9 +23,9 @@ jobs:
           key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
           port: ${{ secrets.EC2_PORT }}
           source: "docker-compose.prod.yml,.env.prod"
-          target: "~/kafka-broker/"
+          target: "~/kafka/"
 
-      - name: Deploy Kafka Broker
+      - name: Deploy Kafka
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -33,7 +33,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
           port: ${{ secrets.EC2_PORT }}
           script: |
-            cd ~/kafka-broker
+            cd ~/kafka
             docker compose -f docker-compose.prod.yml --env-file .env.prod down
             docker compose -f docker-compose.prod.yml --env-file .env.prod up -d
             docker system prune -f
@@ -51,11 +51,11 @@ jobs:
               STATUS=$(docker inspect --format='{{.State.Health.Status}}' hands-up-kafka 2>/dev/null || echo "not found")
               echo "Attempt $i/12: Status=$STATUS"
               if [ "$STATUS" = "healthy" ]; then
-                echo "Kafka broker is healthy."
+                echo "Kafka is healthy."
                 exit 0
               fi
               sleep 10
             done
-            echo "ERROR: Kafka broker did not become healthy within 120 seconds."
+            echo "ERROR: Kafka did not become healthy within 120 seconds."
             docker logs hands-up-kafka --tail 50
             exit 1

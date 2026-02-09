@@ -1,4 +1,4 @@
-# HandsUp Kafka Broker
+# HandsUp Kafka
 
 HandsUp 프로젝트의 Kafka 브로커 인프라. Apache Kafka KRaft 모드 사용 (Zookeeper 불필요).
 

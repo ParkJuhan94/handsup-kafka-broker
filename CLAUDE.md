@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Infrastructure-only repository for the HandsUp project's Kafka broker. No application code — only Docker Compose configurations for running Apache Kafka in KRaft mode.
+Infrastructure-only repository for the HandsUp project's Kafka. No application code — only Docker Compose configurations for running Apache Kafka in KRaft mode.
 
 ## Commands
 
