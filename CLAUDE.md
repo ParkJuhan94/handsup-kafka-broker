@@ -29,7 +29,7 @@ docker inspect --format='{{.State.Health.Status}}' hands-up-kafka
 - **Local listeners**: CONTROLLER(29093), HOST(9092 → host:29092), DOCKER(9093 for kafka-ui)
 - **Prod listeners**: CONTROLLER(29093), INTERNAL(9092), EXTERNAL(9094 → host:29092)
 - **Local extras**: `provectuslabs/kafka-ui` at http://localhost:8080
-- **Prod extras**: memory limits (768M container / 512M heap), `restart: unless-stopped`, health-check verification in CD
+- **Prod extras**: `provectuslabs/kafka-ui` at 127.0.0.1:8080 (SSH tunnel only), memory limits (768M container / 512M heap), `restart: unless-stopped`, health-check verification in CD
 
 ## Deployment
 

@@ -43,6 +43,18 @@ main 브랜치에 push 시 GitHub Actions CD 파이프라인이 자동으로 EC2
 | `EC2_SSH_PRIVATE_KEY` | EC2 SSH 키 |
 | `EC2_PORT` | EC2 SSH 포트 |
 
+### Production Kafka UI (SSH 터널)
+
+kafka-ui는 `127.0.0.1`로만 바인딩되어 외부 접근 불가. SSH 터널로 접속:
+
+```bash
+# 1. SSH 터널 열기
+ssh -L 8080:localhost:8080 -i <키파일> ubuntu@<EC2_IP> -p <SSH포트>
+
+# 2. 브라우저에서 접속
+# http://localhost:8080
+```
+
 ## Architecture
 
 - **Image**: `apache/kafka` (KRaft 모드)
